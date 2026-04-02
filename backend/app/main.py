@@ -9,8 +9,6 @@ from app.api.stats import router as stats_router
 from app.api.domains import router as domains_router
 from app.api.public import router as public_router
 
-Base.metadata.create_all(bind=engine)
-
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
@@ -20,11 +18,16 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:8080"],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+async def startup_event():
+    Base.metadata.create_all(bind=engine)
 
 app.include_router(auth_router, prefix="/api")
 app.include_router(links_router, prefix="/api")

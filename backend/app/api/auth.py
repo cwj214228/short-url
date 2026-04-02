@@ -1,10 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from datetime import timedelta
 
 from app.core.database import get_db
-from app.core.security import verify_password, get_password_hash, create_access_token, create_refresh_token, decode_token
+from app.core.security import (
+    verify_password, get_password_hash, create_access_token, create_refresh_token,
+    decode_token, ACCESS_TOKEN_TYPE, REFRESH_TOKEN_TYPE
+)
 from app.core.config import settings
 from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin, UserResponse, UserUpdate
@@ -14,11 +18,11 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+def _get_user_from_token(db: Session, token: str, expected_type: str) -> User:
     payload = decode_token(token)
     if not payload:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    if payload.get("type") != "access":
+    if payload.get("type") != expected_type:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token type")
     user_id = int(payload.get("sub"))
     user = db.query(User).filter(User.id == user_id).first()
@@ -27,19 +31,28 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     return user
 
 
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+    return _get_user_from_token(db, token, ACCESS_TOKEN_TYPE)
+
+
+def get_user_from_refresh_token(refresh_token: str, db: Session) -> User:
+    return _get_user_from_token(db, refresh_token, REFRESH_TOKEN_TYPE)
+
+
 @router.post("/register", response_model=UserResponse)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
-    existing = db.query(User).filter(User.email == user_data.email).first()
-    if existing:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
     user = User(
         email=user_data.email,
         username=user_data.username,
         password_hash=get_password_hash(user_data.password)
     )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    try:
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
     return user
 
 
@@ -55,13 +68,7 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
 
 @router.post("/refresh", response_model=Token)
 def refresh(refresh_token: str, db: Session = Depends(get_db)):
-    payload = decode_token(refresh_token)
-    if not payload or payload.get("type") != "refresh":
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
-    user_id = int(payload.get("sub"))
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    user = get_user_from_refresh_token(refresh_token, db)
     new_access_token = create_access_token(data={"sub": str(user.id)})
     new_refresh_token = create_refresh_token(data={"sub": str(user.id)})
     return Token(access_token=new_access_token, refresh_token=new_refresh_token)

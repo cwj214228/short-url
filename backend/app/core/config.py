@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     DEFAULT_DOMAIN: str = "localhost:8000"
     SHORT_CODE_LENGTH: int = 8
 
+    # CORS
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8080"]
+
     class Config:
         env_file = ".env"
 

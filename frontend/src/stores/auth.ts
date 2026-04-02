@@ -46,7 +46,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('token')
   }
 
-  if (token.value) {
+  if (token.value && !user.value) {
     fetchUser()
   }
 
