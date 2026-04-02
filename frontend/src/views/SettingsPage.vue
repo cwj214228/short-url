@@ -8,12 +8,14 @@
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium mb-1">Email</label>
-            <input v-model="user.email" type="email" disabled class="input-field bg-gray-100 dark:bg-gray-700" />
+            <input :value="user?.email" type="email" disabled class="input-field bg-gray-100 dark:bg-gray-700" />
           </div>
           <div>
             <label class="block text-sm font-medium mb-1">Username</label>
             <input v-model="form.username" type="text" class="input-field" />
           </div>
+          <div v-if="profileMessage" class="text-green-500 text-sm">{{ profileMessage }}</div>
+          <div v-if="profileError" class="text-red-500 text-sm">{{ profileError }}</div>
           <button @click="handleUpdateProfile" class="btn-primary" :disabled="loading">Save Changes</button>
         </div>
       </div>
@@ -22,11 +24,11 @@
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium mb-1">New Password</label>
-            <input v-model="form.password" type="password" class="input-field" />
+            <input v-model="form.password" type="password" class="input-field" placeholder="Enter new password" />
           </div>
-          <div v-if="message" class="text-green-500 text-sm">{{ message }}</div>
-          <div v-if="error" class="text-red-500 text-sm">{{ error }}</div>
-          <button @click="handleChangePassword" class="btn-primary" :disabled="loading">Update Password</button>
+          <div v-if="passwordMessage" class="text-green-500 text-sm">{{ passwordMessage }}</div>
+          <div v-if="passwordError" class="text-red-500 text-sm">{{ passwordError }}</div>
+          <button @click="handleChangePassword" class="btn-primary" :disabled="loading || !form.password">Update Password</button>
         </div>
       </div>
     </div>
@@ -40,41 +42,44 @@ import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 
-const user = ref<any>(null)
+const user = authStore.user
 const form = reactive({ username: '', password: '' })
-const message = ref('')
-const error = ref('')
+const profileMessage = ref('')
+const profileError = ref('')
+const passwordMessage = ref('')
+const passwordError = ref('')
 const loading = ref(false)
 
 onMounted(async () => {
   await authStore.fetchUser()
-  user.value = authStore.user
-  form.username = user.value?.username || ''
+  form.username = authStore.user?.username || ''
 })
 
 async function handleUpdateProfile() {
   loading.value = true
-  error.value = ''
+  profileError.value = ''
+  profileMessage.value = ''
   try {
     await authStore.updateProfile({ username: form.username })
-    message.value = 'Profile updated successfully'
+    profileMessage.value = 'Profile updated successfully'
   } catch (e: any) {
-    error.value = e.response?.data?.detail || 'Failed to update profile'
+    profileError.value = e.response?.data?.detail || 'Failed to update profile'
   } finally {
     loading.value = false
   }
 }
 
 async function handleChangePassword() {
+  if (!form.password) return
   loading.value = true
-  error.value = ''
-  message.value = ''
+  passwordError.value = ''
+  passwordMessage.value = ''
   try {
     await authStore.updatePassword({ password: form.password })
-    message.value = 'Password updated successfully'
+    passwordMessage.value = 'Password updated successfully'
     form.password = ''
   } catch (e: any) {
-    error.value = e.response?.data?.detail || 'Failed to update password'
+    passwordError.value = e.response?.data?.detail || 'Failed to update password'
   } finally {
     loading.value = false
   }

@@ -30,6 +30,16 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function updateProfile(data: { username?: string }) {
+    const response = await api.put('/auth/me', data)
+    user.value = response.data
+    return response.data
+  }
+
+  async function updatePassword(data: { password: string }) {
+    await api.put('/auth/me', data)
+  }
+
   function logout() {
     token.value = null
     user.value = null
@@ -40,5 +50,5 @@ export const useAuthStore = defineStore('auth', () => {
     fetchUser()
   }
 
-  return { token, user, isAuthenticated, login, register, logout, fetchUser }
+  return { token, user, isAuthenticated, login, register, logout, fetchUser, updateProfile, updatePassword }
 })
