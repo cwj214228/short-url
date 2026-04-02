@@ -9,7 +9,7 @@ python-multipart==0.0.6
 pydantic==2.5.3
 pydantic-settings==2.1.0
 qrcode==7.4.2
-Pillow==10.2.0
+Pillow>=10.3.0
 httpx==0.26.0
 user-agents==2.2.0
 geoip2==4.8.0
