@@ -56,6 +56,7 @@ A public URL shortening service similar to Bitly/TinyURL, built with FastAPI and
 ## Prerequisites
 
 - Python 3.11+
+- [uv](https://github.com/astral-sh/uv) (modern Python package manager)
 - Node.js 20+
 - MySQL 8.0
 - Redis 7+
@@ -108,13 +109,15 @@ The application will be available at:
 ```bash
 cd backend
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or: venv\Scripts\activate  # Windows
+# Install uv if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install dependencies
-pip install -r requirements.txt
+# Create virtual environment and install dependencies
+uv sync
+
+# Or if you prefer manual approach:
+# uv venv
+# uv pip install -r requirements.txt
 
 # Create MySQL database
 mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS shorturl CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
@@ -126,7 +129,7 @@ mysql -u root -p -e "FLUSH PRIVILEGES;"
 redis-server
 
 # Run the application
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 #### Frontend
@@ -260,7 +263,7 @@ Once the backend is running, visit:
 Backend tests:
 ```bash
 cd backend
-pytest
+uv run pytest
 ```
 
 Frontend (if tests are added):
