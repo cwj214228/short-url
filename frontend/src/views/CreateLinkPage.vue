@@ -2,28 +2,28 @@
   <div>
     <NavBar />
     <div class="max-w-2xl mx-auto py-8 px-4">
-      <h1 class="text-2xl font-bold mb-6">Create New Link</h1>
+      <h1 class="text-2xl font-bold mb-6">创建新链接</h1>
       <div class="card p-6">
         <form @submit.prevent="handleCreate" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium mb-1">Original URL *</label>
+            <label class="block text-sm font-medium mb-1">原始链接 *</label>
             <input v-model="form.original_url" type="url" required class="input-field" placeholder="https://example.com/very/long/url" />
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Custom Alias (optional)</label>
+            <label class="block text-sm font-medium mb-1">自定义别名（可选）</label>
             <input v-model="form.custom_alias" class="input-field" placeholder="my-custom-link" />
-            <p class="text-xs text-gray-500 mt-1">3-50 characters, letters, numbers, hyphens and underscores only</p>
+            <p class="text-xs text-gray-500 mt-1">3-50个字符，只能包含字母、数字、连字符和下划线</p>
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Tags (optional)</label>
-            <input v-model="tagsInput" class="input-field" placeholder="tag1, tag2, tag3" />
+            <label class="block text-sm font-medium mb-1">标签（可选）</label>
+            <input v-model="tagsInput" class="input-field" placeholder="标签1, 标签2, 标签3" />
           </div>
           <div v-if="error" class="text-red-500 text-sm">{{ error }}</div>
           <div class="flex gap-4">
             <button type="submit" class="btn-primary" :disabled="loading">
-              {{ loading ? 'Creating...' : 'Create Link' }}
+              {{ loading ? '创建中...' : '创建链接' }}
             </button>
-            <router-link to="/links" class="btn-secondary">Cancel</router-link>
+            <router-link to="/links" class="btn-secondary">取消</router-link>
           </div>
         </form>
       </div>
@@ -56,7 +56,7 @@ async function handleCreate() {
     await linksStore.createLink({ ...form.value, tags })
     router.push('/links')
   } catch (e: any) {
-    error.value = e.response?.data?.detail || 'Failed to create link'
+    error.value = e.response?.data?.detail || '创建链接失败'
   } finally {
     loading.value = false
   }

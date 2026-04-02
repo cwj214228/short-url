@@ -2,31 +2,31 @@
   <div>
     <NavBar />
     <div class="max-w-4xl mx-auto py-8 px-4">
-      <h1 class="text-2xl font-bold mb-6">Custom Domains</h1>
+      <h1 class="text-2xl font-bold mb-6">自定义域名</h1>
       <div class="card p-6 mb-6">
-        <h2 class="text-lg font-semibold mb-4">Add New Domain</h2>
+        <h2 class="text-lg font-semibold mb-4">添加新域名</h2>
         <form @submit.prevent="handleAdd" class="flex gap-4">
           <input v-model="newDomain" type="text" required class="input-field flex-1" placeholder="example.com" />
-          <button type="submit" class="btn-primary" :disabled="loading">Add Domain</button>
+          <button type="submit" class="btn-primary" :disabled="loading">添加域名</button>
         </form>
         <p class="text-sm text-gray-500 mt-2">
-          After adding, you'll need to add a DNS TXT record with the verification token to verify ownership.
+          添加后，您需要添加 DNS TXT 记录和验证码来验证域名所有权。
         </p>
       </div>
       <div class="card p-6">
-        <h2 class="text-lg font-semibold mb-4">Your Domains</h2>
+        <h2 class="text-lg font-semibold mb-4">您的域名</h2>
         <div v-if="domains.length === 0" class="text-center text-gray-500 py-8">
-          No domains added yet.
+          暂无域名。
         </div>
         <div v-else class="space-y-4">
           <div v-for="domain in domains" :key="domain.id" class="flex items-center justify-between border-b dark:border-gray-700 pb-4">
             <div>
               <span class="font-medium">{{ domain.domain }}</span>
-              <span v-if="domain.verified_at" class="ml-2 text-xs text-green-500">Verified</span>
-              <span v-else class="ml-2 text-xs text-yellow-500">Pending Verification</span>
-              <p v-if="!domain.verified_at" class="text-xs text-gray-400 mt-1">Token: {{ domain.verification_token }}</p>
+              <span v-if="domain.verified_at" class="ml-2 text-xs text-green-500">已验证</span>
+              <span v-else class="ml-2 text-xs text-yellow-500">待验证</span>
+              <p v-if="!domain.verified_at" class="text-xs text-gray-400 mt-1">令牌: {{ domain.verification_token }}</p>
             </div>
-            <button @click="handleDelete(domain.domain)" class="text-red-500 hover:text-red-700">Remove</button>
+            <button @click="handleDelete(domain.domain)" class="text-red-500 hover:text-red-700">删除</button>
           </div>
         </div>
       </div>
@@ -62,7 +62,7 @@ async function handleAdd() {
 }
 
 async function handleDelete(domain: string) {
-  if (confirm(`Delete domain ${domain}?`)) {
+  if (confirm(`确定要删除域名 ${domain} 吗？`)) {
     await api.delete(`/domains/${domain}`)
     await fetchDomains()
   }

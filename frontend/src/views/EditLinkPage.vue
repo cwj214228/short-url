@@ -2,33 +2,33 @@
   <div>
     <NavBar />
     <div class="max-w-2xl mx-auto py-8 px-4">
-      <h1 class="text-2xl font-bold mb-6">Edit Link</h1>
-      <div v-if="loading" class="text-center py-12">Loading...</div>
+      <h1 class="text-2xl font-bold mb-6">编辑链接</h1>
+      <div v-if="loading" class="text-center py-12">加载中...</div>
       <div v-else-if="!link" class="card p-6 text-center">
-        <p class="text-gray-500">Link not found</p>
-        <router-link to="/links" class="btn-primary mt-4">Back to Links</router-link>
+        <p class="text-gray-500">链接不存在</p>
+        <router-link to="/links" class="btn-primary mt-4">返回链接列表</router-link>
       </div>
       <div v-else class="card p-6">
         <form @submit.prevent="handleUpdate" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium mb-1">Short URL</label>
+            <label class="block text-sm font-medium mb-1">短链接</label>
             <input :value="`${link.domain}/${link.short_code}`" disabled class="input-field bg-gray-100 dark:bg-gray-700" />
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Original URL *</label>
+            <label class="block text-sm font-medium mb-1">原始链接 *</label>
             <input v-model="form.original_url" type="url" required class="input-field" />
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Active</label>
+            <label class="block text-sm font-medium mb-1">启用状态</label>
             <label class="flex items-center gap-2">
               <input v-model="form.is_active" type="checkbox" class="w-4 h-4" />
-              <span>Link is active</span>
+              <span>链接启用</span>
             </label>
           </div>
           <div v-if="error" class="text-red-500 text-sm">{{ error }}</div>
           <div class="flex gap-4">
-            <button type="submit" class="btn-primary" :disabled="loading">Save Changes</button>
-            <router-link to="/links" class="btn-secondary">Cancel</router-link>
+            <button type="submit" class="btn-primary" :disabled="loading">保存更改</button>
+            <router-link to="/links" class="btn-secondary">取消</router-link>
           </div>
         </form>
       </div>
@@ -68,7 +68,7 @@ async function handleUpdate() {
     await linksStore.updateLink(link.value.short_code, form.value)
     router.push('/links')
   } catch (e: any) {
-    error.value = e.response?.data?.detail || 'Failed to update link'
+    error.value = e.response?.data?.detail || '更新链接失败'
   } finally {
     loading.value = false
   }

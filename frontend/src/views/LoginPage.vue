@@ -1,23 +1,23 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-secondary-500">
     <div class="card p-8 w-full max-w-md">
-      <h1 class="text-2xl font-bold text-center mb-6">Welcome Back</h1>
+      <h1 class="text-2xl font-bold text-center mb-6">欢迎回来</h1>
       <form @submit.prevent="handleLogin" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium mb-1">Email</label>
+          <label class="block text-sm font-medium mb-1">邮箱</label>
           <input v-model="email" type="email" required class="input-field" />
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">Password</label>
+          <label class="block text-sm font-medium mb-1">密码</label>
           <input v-model="password" type="password" required class="input-field" />
         </div>
         <div v-if="error" class="text-red-500 text-sm">{{ error }}</div>
         <button type="submit" class="btn-primary w-full" :disabled="loading">
-          {{ loading ? 'Signing in...' : 'Sign In' }}
+          {{ loading ? '登录中...' : '登录' }}
         </button>
       </form>
       <p class="mt-4 text-center text-sm">
-        Don't have an account? <router-link to="/register" class="text-primary-500 hover:underline">Sign up</router-link>
+        还没有账号？ <router-link to="/register" class="text-primary-500 hover:underline">立即注册</router-link>
       </p>
     </div>
   </div>
@@ -43,7 +43,7 @@ async function handleLogin() {
     await authStore.login(email.value, password.value)
     router.push('/dashboard')
   } catch (e: any) {
-    error.value = e.response?.data?.detail || 'Login failed'
+    error.value = e.response?.data?.detail || '登录失败'
   } finally {
     loading.value = false
   }

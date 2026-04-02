@@ -4,10 +4,10 @@
     <div class="max-w-4xl mx-auto py-20 px-4">
       <div class="text-center mb-12">
         <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">
-          Shorten Your Links
+          缩短你的链接
         </h1>
         <p class="text-xl text-gray-600 dark:text-gray-400">
-          Create short, memorable links in seconds
+          几秒钟内创建短小精悍的链接
         </p>
       </div>
       <div class="card p-6">
@@ -15,20 +15,21 @@
           <input
             v-model="url"
             type="url"
-            placeholder="Paste your long URL here..."
+            placeholder="在此粘贴你的长链接..."
             required
             class="input-field flex-1"
           />
           <button type="submit" class="btn-primary whitespace-nowrap" :disabled="loading">
-            {{ loading ? 'Creating...' : 'Shorten' }}
+            {{ loading ? '创建中...' : '生成短链接' }}
           </button>
         </form>
         <div v-if="shortUrl" class="mt-6 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-          <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Your short URL:</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">你的短链接：</p>
           <div class="flex items-center gap-4">
             <input :value="shortUrl" readonly class="input-field flex-1" ref="copyInput" />
-            <button @click="copyToClipboard" class="btn-secondary">Copy</button>
+            <button @click="copyToClipboard" class="btn-secondary">复制</button>
           </div>
+          <div v-if="copied" class="mt-2 text-green-500 text-sm">复制成功！</div>
         </div>
         <div v-if="error" class="mt-4 text-red-500">{{ error }}</div>
       </div>
@@ -45,6 +46,7 @@ const url = ref('')
 const shortUrl = ref('')
 const error = ref('')
 const loading = ref(false)
+const copied = ref(false)
 const copyInput = ref<HTMLInputElement | null>(null)
 
 async function handleCreate() {
@@ -54,7 +56,7 @@ async function handleCreate() {
     const response = await api.post('/links', { original_url: url.value })
     shortUrl.value = `${response.data.domain}/${response.data.short_code}`
   } catch (e: any) {
-    error.value = e.response?.data?.detail || 'Failed to create short URL'
+    error.value = e.response?.data?.detail || '创建短链接失败'
   } finally {
     loading.value = false
   }
@@ -64,6 +66,10 @@ function copyToClipboard() {
   if (copyInput.value) {
     copyInput.value.select()
     document.execCommand('copy')
+    copied.value = true
+    setTimeout(() => {
+      copied.value = false
+    }, 2000)
   }
 }
 </script>
